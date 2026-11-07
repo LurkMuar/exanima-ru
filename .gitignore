@@ -1,0 +1,13 @@
+# Game and third-party files are never committed
+*.exe
+*.rpk
+*.rfi
+*.cord
+*.bin
+*.zip
+*.log
+game/
+backup/
+steam-original/
+extracted/
+installer/
