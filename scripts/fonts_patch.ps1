@@ -14,6 +14,7 @@ param(
     [int]$SpacingLatin = 3,
     [int]$SpacingCyr = 0
 )
+$ErrorActionPreference = "Stop"
 $src  = "$Root\backup\Exanima.exe"
 $dst  = "$Root\game\Exanima.exe"
 $font = "$Root\game\patcher\Font"
@@ -27,7 +28,8 @@ $slots = @(
     @{ File = "Exanima_11.rfi"; Name = "12R"; Off = 3901988; Size = 27387; Entry = 3720532 },
     @{ File = "Exanima_12.rfi"; Name = "16R"; Off = 3929376; Size = 49083; Entry = 3720548 }
 )
-$want = if ($Fonts -eq "none") { @() } else { $Fonts -split ',' }
+$want = if ($Fonts.Trim() -eq "none") { @() } else { @($Fonts -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ }) }
+foreach ($w in $want) { if ($slots.Name -notcontains $w) { throw "Unknown font '$w'. Valid: $($slots.Name -join ',') or none" } }
 
 foreach ($s in $slots) {
     if ($want -notcontains $s.Name) { continue }

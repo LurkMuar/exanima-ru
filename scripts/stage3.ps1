@@ -15,10 +15,17 @@ $cur = [IO.File]::ReadAllLines("$dir\resource.txt", $enc)
 if ($out.Count -ne $cur.Count) { throw "Line count mismatch: stage1=$($out.Count) resource=$($cur.Count)" }
 
 $nModel = 0; $nOv = 0
+# Guard against a game update shifting line numbers: target lines must still be English text.
+function Target([string]$num, [string]$from) {
+    $i = [int]$num - 1
+    if ($i -lt 0 -or $i -ge $cur.Count) { throw "${from}: line $num is outside resource.txt (1..$($cur.Count))" }
+    if ($cur[$i] -like 'file\*' -or $cur[$i] -notmatch '[A-Za-z]{2}') { throw "${from}: line $num is not translatable text ('$($cur[$i])'). Did the game update?" }
+    return $i
+}
 foreach ($l in [IO.File]::ReadAllLines($Stage2, $utf8)) {
     $p = $l -split "`t"
     if ($p.Count -lt 3 -or $p[1] -eq 'FAIL') { continue }
-    $i = [int]$p[0] - 1
+    $i = Target $p[0] $Stage2
     if ($p.Count -ge 4) {
         if (-not $p[3]) { continue }
         if ($cur[$i] -cne $p[2]) { throw "Source mismatch at line $($p[0])" }
@@ -29,7 +36,8 @@ foreach ($l in [IO.File]::ReadAllLines($Stage2, $utf8)) {
 foreach ($l in [IO.File]::ReadAllLines($Overrides, $utf8)) {
     if ($l -match '^\s*#' -or $l -notmatch "`t") { continue }
     $num, $ru = $l -split "`t", 2
-    $out[[int]$num - 1] = $ru; $nOv++
+    if (-not $ru) { continue }
+    $out[(Target $num $Overrides)] = $ru; $nOv++
 }
 
 $left = 0

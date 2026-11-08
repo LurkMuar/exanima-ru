@@ -7,6 +7,8 @@ $en   = [IO.File]::ReadAllLines("$dir\resource_EN.txt", $enc)
 $ru   = [IO.File]::ReadAllLines("$dir\resource_RU.txt", $enc)
 $cur  = [IO.File]::ReadAllLines("$dir\resource.txt", $enc)
 $full = [IO.File]::ReadAllLines("$dir\resource_RU_FULL.txt", $enc)
+if ($en.Count -ne $ru.Count) { throw "resource_EN.txt ($($en.Count)) and resource_RU.txt ($($ru.Count)) differ in line count" }
+if ($cur.Count -ne $full.Count) { throw "resource.txt ($($cur.Count)) and resource_RU_FULL.txt ($($full.Count)) differ in line count" }
 
 $tm = New-Object 'System.Collections.Generic.Dictionary[string,string]' ([StringComparer]::Ordinal)
 for ($i = 0; $i -lt $en.Count; $i++) {
